@@ -9,6 +9,7 @@
 #include <boost/program_options/parsers.hpp>
 
 using std::cout;
+using std::cerr;
 using std::endl;
 using std::ifstream;
 using std::vector;
@@ -23,7 +24,8 @@ int main(int argc, char *argv[])
 	po::options_description desc;
 	desc.add_options()
 		("help","produce help")
-		("N", boost::program_options::value<int>()->default_value(4), "number of words");
+		("N", boost::program_options::value<int>()->default_value(4), "number of words")
+		("dictionary", po::value<std::string>()->default_value("/usr/share/dict/words"), "dictionary file with one word per line");
 
 	po::variables_map vm;
 	po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -36,10 +38,13 @@ int main(int argc, char *argv[])
 
 	int N = vm["N"].as<int>();
 
-	ifstream words_file ("/usr/share/dict/words");	
+	string dictionary_file = vm["dictionary"].as<string>();	
+
+	ifstream words_file (dictionary_file);	
 	
-	if (words_file.is_open()) {
-		cout << "Opened dictionary file..." << endl;
+	if (!words_file.is_open()) {
+		cerr << "Error: unable to open dictionary file" << endl;
+		return 1;
 	}
 
 	string word;
